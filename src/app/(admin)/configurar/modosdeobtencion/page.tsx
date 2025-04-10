@@ -1,0 +1,1 @@
+//pagina de gestion de modos de obtencion de datos

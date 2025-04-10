@@ -1,0 +1,29 @@
+// Super Lista Project Rules
+
+// Icons
+1. Use https://tabler.io/icons/icon/paper-bag icon from tabler for the project icon
+2. All other icons should be from lucide-react
+
+// Components
+3. Use tailwind CSS for styling
+4. Use shadcn/ui components where applicable
+5. Follow consistent naming conventions
+
+// Code Style
+6. Use TypeScript for type safety
+7. Keep components modular and reusable
+8. Follow Next.js app directory conventions
+9. Use client-side components with "use client" directive when necessary 
+
+//Project
+10. The project is for Spain, so it should be in spanish even tho the chat can be in english
+11. Never edit any compoinen t from the folder `src/components/ui/`
+
+// Structure
+12. Paginas de Authenticacion - `src/app/(auth)/`
+13. Paginas Administrativas - `src/app/(admin)/`
+14. Paginas Usuarios Registrados - `src/app/(app)/`
+15. Paginas Publicas - `src/app/(portal)/`
+16. When coding you should add comments on what you do, and add on top of the file all the features or functions of that specific file, and if you remove the code also make sure you reflect the changes on the comments on the top of the file.
+17. Don't create mockdata but actually connect to the database and use always real data
+18. Always check the `schema.prisma` to make sure you follow it in any route creation or form or anything that connects to the database

@@ -1,0 +1,1 @@
+//pagina de gestion de una categoria especifica

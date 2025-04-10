@@ -1,0 +1,457 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Reference tables
+model UnidadesMedida {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(20) @unique
+  descripcion     String           @db.VarChar(100)
+  productos       Producto[]       @relation("ProductoUnidadMedida")
+  ingredientes    Ingrediente[]
+
+  @@map("unidades_medida")
+}
+
+model Etiqueta {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(20) @unique
+  descripcion     String           @db.VarChar(100)
+  productos       Producto[]       @relation("ProductoEtiquetas")
+
+  @@map("etiquetas")
+}
+
+model MetodoObtencion {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(20) @unique
+  descripcion     String           @db.VarChar(100)
+  usoTipico       String?          @db.VarChar(100) @map("uso_tipico")
+  supermercados   Supermercado[]
+  precios         Precio[]
+  historialPrecios HistorialPrecio[]
+
+  @@map("metodos_obtencion")
+}
+
+model SexoGenero {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(20) @unique
+  descripcion     String           @db.VarChar(50)
+  usuarios        Usuario[]
+  miembrosHogar   MiembroHogar[]
+
+  @@map("sexo_genero")
+}
+
+model NivelPrivacidad {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(20) @unique
+  descripcion     String           @db.VarChar(50)
+  listas          Lista[]
+
+  @@map("niveles_privacidad")
+}
+
+model TipoMascota {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(20) @unique
+  descripcion     String           @db.VarChar(50)
+  mascotas        Mascota[]
+
+  @@map("tipos_mascota")
+}
+
+model ModoLista {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(20) @unique
+  descripcion     String           @db.VarChar(50)
+  listas          Lista[]
+  preferenciasUsuario PreferenciasUsuario[]
+
+  @@map("modos_lista")
+}
+
+model TipoUsuario {
+  id              Int              @id @default(autoincrement())
+  valor           String           @db.VarChar(50) @unique
+  descripcion     String           @db.VarChar(100)
+  usuarios        Usuario[]
+
+  @@map("tipos_usuario")
+}
+
+// Main tables
+model Categoria {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(100)
+  descripcion       String?          @db.VarChar(640)
+  categoriaPadreId  Int?             @map("categoria_padre_id")
+  imagenUrl         String?          @db.VarChar(500) @map("imagen_url")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime        @default(now()) @map("fecha_actualizacion")
+  activo            Boolean          @default(true)
+  
+  // Relations
+  categoriaPadre    Categoria?       @relation("CategoriasHierarchy", fields: [categoriaPadreId], references: [id])
+  subcategorias     Categoria[]      @relation("CategoriasHierarchy")
+  tiposProducto     TipoProducto[]
+  usuariosInteresados Usuario[]      @relation("UsuarioCategoriasInteres")
+
+  @@map("categorias")
+}
+
+model TipoProducto {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(250)
+  categoriaId       Int              @map("categoria_id")
+  imagenUrl         String?          @db.VarChar(500) @map("imagen_url")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime        @default(now()) @map("fecha_actualizacion")
+  activo            Boolean          @default(true)
+  
+  // Relations
+  categoria         Categoria        @relation(fields: [categoriaId], references: [id])
+  productos         Producto[]
+  ingredientes      Ingrediente[]
+  interaccionesUsuario InteraccionUsuario[] @relation("InteraccionTipoProducto")
+
+  @@map("tipos_producto")
+}
+
+model Marca {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(100)
+  logoUrl           String?          @db.VarChar(500) @map("logo_url")
+  esMarcaBlanca     Boolean          @default(false) @map("es_marca_blanca")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  activo            Boolean          @default(true)
+  
+  // Relations
+  productos         Producto[]
+  usuariosPreferidos Usuario[]       @relation("UsuarioMarcasPreferidas")
+  usuariosEvitados  Usuario[]        @relation("UsuarioMarcasEvitadas")
+
+  @@map("marcas")
+}
+
+model Producto {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(200)
+  marcaId           Int              @map("marca_id")
+  tipoProductoId    Int              @map("tipo_producto_id")
+  tamanoCantidad    Decimal          @map("tamano_cantidad")
+  unidadMedidaId    Int              @map("unidad_medida_id")
+  fotoUrl           String?          @db.VarChar(500) @map("foto_url")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime        @default(now()) @map("fecha_actualizacion")
+  fechaDesactivado  DateTime?        @map("fecha_desactivado")
+  descontinuado     Boolean          @default(false)
+  
+  // Relations
+  marca             Marca            @relation(fields: [marcaId], references: [id])
+  tipoProducto      TipoProducto     @relation(fields: [tipoProductoId], references: [id])
+  unidadMedida      UnidadesMedida   @relation("ProductoUnidadMedida", fields: [unidadMedidaId], references: [id])
+  etiquetas         Etiqueta[]       @relation("ProductoEtiquetas")
+  precios           Precio[]
+  historialPrecios  HistorialPrecio[]
+  usuariosInteresados Usuario[]      @relation("UsuarioProductosInteres")
+  elementosLista    ElementoLista[]
+  validaciones      ValidacionProducto[]
+  interaccionesUsuario InteraccionUsuario[] @relation("InteraccionProducto")
+
+  @@map("productos")
+}
+
+model Supermercado {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(100)
+  logoUrl           String?          @db.VarChar(500) @map("logo_url")
+  sitioWeb          String?          @db.VarChar(255) @map("sitio_web")
+  directorioCsv     String?          @db.VarChar(255) @map("directorio_csv")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaUltimoProcesamiento DateTime? @map("fecha_ultimo_procesamiento")
+  metodoObtencionId Int              @map("metodo_obtencion_id")
+  frecuenciaActualizacion String?    @db.VarChar(50) @map("frecuencia_actualizacion")
+  activo            Boolean          @default(true)
+  
+  // Relations
+  metodoObtencion   MetodoObtencion  @relation(fields: [metodoObtencionId], references: [id])
+  precios           Precio[]
+  historialPrecios  HistorialPrecio[]
+  usuariosFavoritos Usuario[]        @relation("UsuarioSupermercadosFavoritos")
+
+  @@map("supermercados")
+}
+
+model Precio {
+  id                Int              @id @default(autoincrement())
+  productoId        Int              @map("producto_id")
+  supermercadoId    Int              @map("supermercado_id")
+  precioActual      Int              @map("precio_actual")
+  esOferta          Boolean          @default(false) @map("es_oferta")
+  precioPromocional Int?             @map("precio_promocional")
+  fechaInicioPromocion DateTime?     @map("fecha_inicio_promocion")
+  fechaFinPromocion DateTime?        @map("fecha_fin_promocion")
+  fechaActualizacion DateTime        @default(now()) @map("fecha_actualizacion")
+  metodoObtencionId Int              @map("metodo_obtencion_id")
+  
+  // Relations
+  producto          Producto         @relation(fields: [productoId], references: [id])
+  supermercado      Supermercado     @relation(fields: [supermercadoId], references: [id])
+  metodoObtencion   MetodoObtencion  @relation(fields: [metodoObtencionId], references: [id])
+
+  @@map("precios")
+}
+
+model HistorialPrecio {
+  id                Int              @id @default(autoincrement())
+  productoId        Int              @map("producto_id")
+  supermercadoId    Int              @map("supermercado_id")
+  precio            Int
+  esOferta          Boolean          @map("es_oferta")
+  precioPromocional Int?             @map("precio_promocional")
+  fechaRegistro     DateTime         @default(now()) @map("fecha_registro")
+  metodoObtencionId Int              @map("metodo_obtencion_id")
+  
+  // Relations
+  producto          Producto         @relation(fields: [productoId], references: [id])
+  supermercado      Supermercado     @relation(fields: [supermercadoId], references: [id])
+  metodoObtencion   MetodoObtencion  @relation(fields: [metodoObtencionId], references: [id])
+
+  @@map("historial_precios")
+}
+
+model Hogar {
+  id                Int              @id @default(autoincrement())
+  nombre            String?          @db.VarChar(100)
+  usuarioPrincipalId Int             @map("usuario_principal_id")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime        @default(now()) @map("fecha_actualizacion")
+  
+  // Relations
+  usuarioPrincipal  Usuario          @relation("HogarUsuarioPrincipal", fields: [usuarioPrincipalId], references: [id])
+  usuarios          Usuario[]        @relation("UsuarioHogar")
+  miembros          MiembroHogar[]
+  mascotas          Mascota[]
+
+  @@map("hogares")
+}
+
+model Usuario {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(100)
+  email             String           @unique @db.VarChar(255)
+  telefonoMovil     String?          @db.VarChar(20) @map("telefono_movil")
+  autenticacionEmail Boolean         @default(true) @map("autenticacion_email")
+  autenticacionSms  Boolean          @default(false) @map("autenticacion_sms")
+  fechaNacimiento   DateTime?        @map("fecha_nacimiento") @db.Date
+  codigoPostal      String?          @db.VarChar(10) @map("codigo_postal")
+  sexoId            Int?             @map("sexo_id")
+  fechaRegistro     DateTime         @default(now()) @map("fecha_registro")
+  ultimaConexion    DateTime?        @map("ultima_conexion")
+  tokenAutenticacion String?         @db.VarChar(255) @map("token_autenticacion")
+  activo            Boolean          @default(true)
+  bloqueado         Boolean          @default(false)
+  hogarId           Int?             @map("hogar_id")
+  tipoUsuarioId     Int              @map("tipo_usuario_id")
+  
+  // Relations
+  sexo              SexoGenero?      @relation(fields: [sexoId], references: [id])
+  hogar             Hogar?           @relation("UsuarioHogar", fields: [hogarId], references: [id])
+  tipoUsuario       TipoUsuario      @relation(fields: [tipoUsuarioId], references: [id])
+  hogaresAdministrados Hogar[]       @relation("HogarUsuarioPrincipal")
+  productosInteres  Producto[]       @relation("UsuarioProductosInteres")
+  marcasPreferidas  Marca[]          @relation("UsuarioMarcasPreferidas")
+  marcasEvitadas    Marca[]          @relation("UsuarioMarcasEvitadas")
+  supermercadosFavoritos Supermercado[] @relation("UsuarioSupermercadosFavoritos")
+  categoriasInteres Categoria[]      @relation("UsuarioCategoriasInteres")
+  preferencias      PreferenciasUsuario?
+  listas            Lista[]
+  recetas           Receta[]
+  interacciones     InteraccionUsuario[]
+  validacionesRealizadas ValidacionProducto[] @relation("AdminValidaciones")
+
+  @@map("usuarios")
+}
+
+model MiembroHogar {
+  id                Int              @id @default(autoincrement())
+  hogarId           Int              @map("hogar_id")
+  nombre            String?          @db.VarChar(100)
+  sexoId            Int?             @map("sexo_id")
+  fechaNacimiento   DateTime?        @map("fecha_nacimiento") @db.Date
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  
+  // Relations
+  hogar             Hogar            @relation(fields: [hogarId], references: [id])
+  sexo              SexoGenero?      @relation(fields: [sexoId], references: [id])
+  restricciones     RestriccionAlimentaria[]
+
+  @@map("miembros_hogar")
+}
+
+model RestriccionAlimentaria {
+  miembroId         Int              @map("miembro_id")
+  restriccion       String           @db.VarChar(100)
+  
+  // Relations
+  miembro           MiembroHogar     @relation(fields: [miembroId], references: [id])
+
+  @@id([miembroId, restriccion])
+  @@map("restricciones_alimentarias")
+}
+
+model Mascota {
+  id                Int              @id @default(autoincrement())
+  hogarId           Int              @map("hogar_id")
+  nombre            String?          @db.VarChar(100)
+  tipoMascotaId     Int              @map("tipo_mascota_id")
+  raza              String?          @db.VarChar(100)
+  fechaNacimiento   DateTime?        @map("fecha_nacimiento") @db.Date
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  
+  // Relations
+  hogar             Hogar            @relation(fields: [hogarId], references: [id])
+  tipoMascota       TipoMascota      @relation(fields: [tipoMascotaId], references: [id])
+
+  @@map("mascotas")
+}
+
+model PreferenciasUsuario {
+  id                Int              @id @default(autoincrement())
+  usuarioId         Int              @unique @map("usuario_id")
+  modoListaPreferidoId Int?          @map("modo_lista_preferido_id")
+  notificacionesOfertas Boolean      @default(true) @map("notificaciones_ofertas")
+  notificacionesListas Boolean       @default(true) @map("notificaciones_listas")
+  notificacionesRecomendaciones Boolean @default(true) @map("notificaciones_recomendaciones")
+  
+  // Relations
+  usuario           Usuario          @relation(fields: [usuarioId], references: [id])
+  modoListaPreferido ModoLista?      @relation(fields: [modoListaPreferidoId], references: [id])
+
+  @@map("preferencias_usuario")
+}
+
+model Lista {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(100)
+  usuarioId         Int?             @map("usuario_id")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaModificacion DateTime         @default(now()) @map("fecha_modificacion")
+  modoListaId       Int              @map("modo_lista_id")
+  enEdicion         Boolean          @default(true) @map("en_edicion")
+  enCompra          Boolean          @default(false) @map("en_compra")
+  completada        Boolean          @default(false)
+  archivada         Boolean          @default(false)
+  urlCompartir      String?          @db.VarChar(255) @map("url_compartir")
+  esPublica         Boolean          @default(false) @map("es_publica")
+  esPlantilla       Boolean          @default(false) @map("es_plantilla")
+  listaPlantillaId  Int?             @map("lista_plantilla_id")
+  privacidadId      Int              @map("privacidad_id")
+  
+  // Relations
+  usuario           Usuario?         @relation(fields: [usuarioId], references: [id])
+  modoLista         ModoLista        @relation(fields: [modoListaId], references: [id])
+  listaPlantilla    Lista?           @relation("ListaPlantilla", fields: [listaPlantillaId], references: [id])
+  listasDerivadas   Lista[]          @relation("ListaPlantilla")
+  privacidad        NivelPrivacidad  @relation(fields: [privacidadId], references: [id])
+  elementos         ElementoLista[]
+  interaccionesUsuario InteraccionUsuario[] @relation("InteraccionLista")
+
+  @@map("listas")
+}
+
+model ElementoLista {
+  id                Int              @id @default(autoincrement())
+  listaId           Int              @map("lista_id")
+  productoId        Int              @map("producto_id")
+  cantidad          Decimal          @default(1)
+  comprado          Boolean          @default(false)
+  fechaAdicion      DateTime         @default(now()) @map("fecha_adicion")
+  fechaCompra       DateTime?        @map("fecha_compra")
+  posicion          Int?
+  
+  // Relations
+  lista             Lista            @relation(fields: [listaId], references: [id])
+  producto          Producto         @relation(fields: [productoId], references: [id])
+
+  @@map("elementos_lista")
+}
+
+model Receta {
+  id                Int              @id @default(autoincrement())
+  nombre            String           @db.VarChar(100)
+  descripcion       String?
+  instrucciones     String?
+  tiempoPreparacion Int?             @map("tiempo_preparacion")
+  dificultad        String?          @db.VarChar(20)
+  estado            String           @default("Draft") @db.VarChar(20)
+  usuarioId         Int?             @map("usuario_id")
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaActualizacion DateTime        @default(now()) @map("fecha_actualizacion")
+  
+  // Relations
+  usuario           Usuario?         @relation(fields: [usuarioId], references: [id])
+  ingredientes      Ingrediente[]
+
+  @@map("recetas")
+}
+
+model Ingrediente {
+  id                Int              @id @default(autoincrement())
+  recetaId          Int              @map("receta_id")
+  tipoProductoId    Int              @map("tipo_producto_id")
+  cantidad          Decimal
+  unidadMedidaId    Int              @map("unidad_medida_id")
+  
+  // Relations
+  receta            Receta           @relation(fields: [recetaId], references: [id])
+  tipoProducto      TipoProducto     @relation(fields: [tipoProductoId], references: [id])
+  unidadMedida      UnidadesMedida   @relation(fields: [unidadMedidaId], references: [id])
+
+  @@map("ingredientes")
+}
+
+model InteraccionUsuario {
+  id                Int              @id @default(autoincrement())
+  usuarioId         Int              @map("usuario_id")
+  tipoEvento        String           @db.VarChar(50) @map("tipo_evento")
+  productoId        Int?             @map("producto_id")
+  tipoProductoId    Int?             @map("tipo_producto_id")
+  listaId           Int?             @map("lista_id")
+  detalles          Json?
+  fecha             DateTime         @default(now())
+  
+  // Relations
+  usuario           Usuario          @relation(fields: [usuarioId], references: [id])
+  producto          Producto?        @relation("InteraccionProducto", fields: [productoId], references: [id])
+  tipoProducto      TipoProducto?    @relation("InteraccionTipoProducto", fields: [tipoProductoId], references: [id])
+  lista             Lista?           @relation("InteraccionLista", fields: [listaId], references: [id])
+
+  @@map("interacciones_usuario")
+}
+
+model ValidacionProducto {
+  id                Int              @id @default(autoincrement())
+  productoId        Int              @map("producto_id")
+  errorDescripcion  String           @map("error_descripcion")
+  estado            String           @default("Pendiente") @db.VarChar(20)
+  fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
+  fechaResolucion   DateTime?        @map("fecha_resolucion")
+  adminId           Int?             @map("admin_id")
+  
+  // Relations
+  producto          Producto         @relation(fields: [productoId], references: [id])
+  admin             Usuario?         @relation("AdminValidaciones", fields: [adminId], references: [id])
+
+  @@map("validaciones_productos")
+} 
