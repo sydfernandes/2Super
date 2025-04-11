@@ -1,10 +1,15 @@
 /**
- * Dynamic API Routes for MetodoObtencion (Price Obtaining Methods)
+ * Dynamic API Routes for MetodoObtencion (Price Obtaining Method)
  * 
  * Endpoints:
- * GET /api/metodos-obtencion/[id] - Get a specific price obtaining method
+ * GET /api/metodos-obtencion/[id] - Get a specific price obtaining method with its relationships
  * PUT /api/metodos-obtencion/[id] - Update a price obtaining method
  * DELETE /api/metodos-obtencion/[id] - Delete a price obtaining method
+ * 
+ * Relationships included:
+ * - supermercados (supermarkets)
+ * - precios (prices)
+ * - historialPrecios (price history)
  */
 
 import { NextResponse } from 'next/server';
@@ -16,15 +21,20 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const metodo = await prisma.metodoObtencion.findUnique({
+    const metodoObtencion = await prisma.metodoObtencion.findUnique({
       where: { id: parseInt(params.id) },
+      include: {
+        supermercados: true,
+        precios: true,
+        historialPrecios: true,
+      },
     });
 
-    if (!metodo) {
+    if (!metodoObtencion) {
       return NextResponse.json({ error: 'Price obtaining method not found' }, { status: 404 });
     }
 
-    return NextResponse.json(metodo);
+    return NextResponse.json(metodoObtencion);
   } catch (error) {
     return NextResponse.json({ error: 'Error fetching price obtaining method' }, { status: 500 });
   }
@@ -37,13 +47,17 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { valor, descripcion, usoTipico } = body;
+    const {
+      valor,
+      descripcion,
+      usoTipico,
+    } = body;
 
     if (!valor || !descripcion) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const metodo = await prisma.metodoObtencion.update({
+    const metodoObtencion = await prisma.metodoObtencion.update({
       where: { id: parseInt(params.id) },
       data: {
         valor,
@@ -52,7 +66,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(metodo);
+    return NextResponse.json(metodoObtencion);
   } catch (error) {
     return NextResponse.json({ error: 'Error updating price obtaining method' }, { status: 500 });
   }

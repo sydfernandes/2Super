@@ -2,9 +2,13 @@
  * Dynamic API Routes for SexoGenero (Gender)
  * 
  * Endpoints:
- * GET /api/sexos-genero/[id] - Get a specific gender
+ * GET /api/sexos-genero/[id] - Get a specific gender with its relationships
  * PUT /api/sexos-genero/[id] - Update a gender
  * DELETE /api/sexos-genero/[id] - Delete a gender
+ * 
+ * Relationships included:
+ * - usuarios (users)
+ * - miembrosHogar (household members)
  */
 
 import { NextResponse } from 'next/server';
@@ -16,15 +20,19 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const sexo = await prisma.sexoGenero.findUnique({
+    const sexoGenero = await prisma.sexoGenero.findUnique({
       where: { id: parseInt(params.id) },
+      include: {
+        usuarios: true,
+        miembrosHogar: true,
+      },
     });
 
-    if (!sexo) {
+    if (!sexoGenero) {
       return NextResponse.json({ error: 'Gender not found' }, { status: 404 });
     }
 
-    return NextResponse.json(sexo);
+    return NextResponse.json(sexoGenero);
   } catch (error) {
     return NextResponse.json({ error: 'Error fetching gender' }, { status: 500 });
   }
@@ -37,13 +45,16 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { valor, descripcion } = body;
+    const {
+      valor,
+      descripcion,
+    } = body;
 
     if (!valor || !descripcion) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const sexo = await prisma.sexoGenero.update({
+    const sexoGenero = await prisma.sexoGenero.update({
       where: { id: parseInt(params.id) },
       data: {
         valor,
@@ -51,7 +62,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(sexo);
+    return NextResponse.json(sexoGenero);
   } catch (error) {
     return NextResponse.json({ error: 'Error updating gender' }, { status: 500 });
   }

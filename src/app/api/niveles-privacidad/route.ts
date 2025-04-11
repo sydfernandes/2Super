@@ -1,12 +1,12 @@
 /**
- * API Routes for NivelPrivacidad (Privacy Level)
+ * Base API Routes for NivelPrivacidad (Privacy Level)
  * 
  * Endpoints:
- * GET /api/niveles-privacidad - Get all privacy levels
- * GET /api/niveles-privacidad/[id] - Get a specific privacy level
+ * GET /api/niveles-privacidad - Get all privacy levels with their relationships
  * POST /api/niveles-privacidad - Create a new privacy level
- * PUT /api/niveles-privacidad/[id] - Update a privacy level
- * DELETE /api/niveles-privacidad/[id] - Delete a privacy level
+ * 
+ * Relationships included:
+ * - listas (lists)
  */
 
 import { NextResponse } from 'next/server';
@@ -15,31 +15,39 @@ import { prisma } from '@/lib/prisma';
 // GET all privacy levels
 export async function GET() {
   try {
-    const niveles = await prisma.nivelPrivacidad.findMany();
-    return NextResponse.json(niveles);
+    const nivelesPrivacidad = await prisma.nivelPrivacidad.findMany({
+      include: {
+        listas: true,
+      },
+    });
+
+    return NextResponse.json(nivelesPrivacidad);
   } catch (error) {
     return NextResponse.json({ error: 'Error fetching privacy levels' }, { status: 500 });
   }
 }
 
-// POST new privacy level
+// POST create new privacy level
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { valor, descripcion } = body;
+    const {
+      valor,
+      descripcion,
+    } = body;
 
     if (!valor || !descripcion) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const nivel = await prisma.nivelPrivacidad.create({
+    const nivelPrivacidad = await prisma.nivelPrivacidad.create({
       data: {
         valor,
         descripcion,
       },
     });
 
-    return NextResponse.json(nivel, { status: 201 });
+    return NextResponse.json(nivelPrivacidad);
   } catch (error) {
     return NextResponse.json({ error: 'Error creating privacy level' }, { status: 500 });
   }
