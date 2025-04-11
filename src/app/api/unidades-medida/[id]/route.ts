@@ -2,9 +2,13 @@
  * Dynamic API Routes for UnidadesMedida (Measurement Units)
  * 
  * Endpoints:
- * GET /api/unidades-medida/[id] - Get a specific measurement unit
+ * GET /api/unidades-medida/[id] - Get a specific measurement unit with its relationships
  * PUT /api/unidades-medida/[id] - Update a measurement unit
  * DELETE /api/unidades-medida/[id] - Delete a measurement unit
+ * 
+ * Relationships included:
+ * - productos (products)
+ * - ingredientes (ingredients)
  */
 
 import { NextResponse } from 'next/server';
@@ -16,15 +20,19 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const unidad = await prisma.unidadesMedida.findUnique({
+    const unidadMedida = await prisma.unidadesMedida.findUnique({
       where: { id: parseInt(params.id) },
+      include: {
+        productos: true,
+        ingredientes: true,
+      },
     });
 
-    if (!unidad) {
+    if (!unidadMedida) {
       return NextResponse.json({ error: 'Measurement unit not found' }, { status: 404 });
     }
 
-    return NextResponse.json(unidad);
+    return NextResponse.json(unidadMedida);
   } catch (error) {
     return NextResponse.json({ error: 'Error fetching measurement unit' }, { status: 500 });
   }
@@ -37,13 +45,16 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { valor, descripcion } = body;
+    const {
+      valor,
+      descripcion,
+    } = body;
 
     if (!valor || !descripcion) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const unidad = await prisma.unidadesMedida.update({
+    const unidadMedida = await prisma.unidadesMedida.update({
       where: { id: parseInt(params.id) },
       data: {
         valor,
@@ -51,7 +62,7 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(unidad);
+    return NextResponse.json(unidadMedida);
   } catch (error) {
     return NextResponse.json({ error: 'Error updating measurement unit' }, { status: 500 });
   }

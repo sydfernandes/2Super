@@ -1,10 +1,13 @@
 /**
- * Dynamic API Routes for Etiqueta (Tags)
+ * Dynamic API Routes for Etiqueta (Tag)
  * 
  * Endpoints:
- * GET /api/etiquetas/[id] - Get a specific tag
+ * GET /api/etiquetas/[id] - Get a specific tag with its relationships
  * PUT /api/etiquetas/[id] - Update a tag
  * DELETE /api/etiquetas/[id] - Delete a tag
+ * 
+ * Relationships included:
+ * - productos (products)
  */
 
 import { NextResponse } from 'next/server';
@@ -18,6 +21,9 @@ export async function GET(
   try {
     const etiqueta = await prisma.etiqueta.findUnique({
       where: { id: parseInt(params.id) },
+      include: {
+        productos: true,
+      },
     });
 
     if (!etiqueta) {
@@ -37,7 +43,10 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { valor, descripcion } = body;
+    const {
+      valor,
+      descripcion,
+    } = body;
 
     if (!valor || !descripcion) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
