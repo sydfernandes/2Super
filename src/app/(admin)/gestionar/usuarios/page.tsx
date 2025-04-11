@@ -256,10 +256,24 @@ export default function AdminUsuariosPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <h1 className="text-3xl font-bold mb-6">Gestión de Usuarios Administrativos</h1>
+    <div className="max-w-5xl mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Gestión de Usuarios</h1>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            className="flex items-center gap-2"
+            onClick={handleCrearUsuario}
+          >
+            <Plus className="h-4 w-4" />
+            Nuevo Usuario
+          </Button>
+        </div>
+      </div>
       
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
           <CardTitle>Usuarios Administrativos</CardTitle>
           <CardDescription>
@@ -280,13 +294,9 @@ export default function AdminUsuariosPage() {
             </div>
             
             <div className="flex gap-2">
-              <Button variant="outline" size="sm">
-                <Filter className="mr-2 h-4 w-4" />
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
                 Filtros
-              </Button>
-              <Button size="sm" onClick={handleCrearUsuario}>
-                <Plus className="mr-2 h-4 w-4" />
-                Nuevo Usuario
               </Button>
             </div>
           </div>

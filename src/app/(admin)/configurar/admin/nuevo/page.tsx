@@ -10,6 +10,7 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { ArrowLeft, Save, X } from "lucide-react"
+import Link from "next/link"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -30,7 +31,7 @@ import {
 } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
-import { toastSuccess, toastError, toastInfo } from "@/lib/toast"
+import { toast } from "sonner"
 
 // Tipo para usuario administrador
 type TipoUsuario = {
@@ -83,11 +84,11 @@ export default function NuevoUsuarioPage() {
             }
           }
         } else {
-          toastInfo(data.message || "No se pudieron cargar los tipos de usuario");
+          toast.error(data.message || "No se pudieron cargar los tipos de usuario");
         }
       } catch (error) {
         console.error("Error fetching tipos de usuario:", error);
-        toastError("No se pudieron cargar los tipos de usuario");
+        toast.error("No se pudieron cargar los tipos de usuario");
       } finally {
         setLoading(false);
       }
@@ -168,52 +169,53 @@ export default function NuevoUsuarioPage() {
       const result = await response.json();
       
       if (result.success) {
-        toastSuccess("Usuario creado con éxito");
+        toast.success("Usuario creado con éxito");
         // Redirigir a la lista de usuarios
         router.push("/configurar/admin");
       } else {
-        toastError(result.message || "Error al crear el usuario");
+        toast.error(result.message || "Error al crear el usuario");
       }
     } catch (error) {
       console.error("Error al crear usuario:", error);
-      toastError("No se pudo crear el usuario. Inténtalo de nuevo más tarde.");
+      toast.error("No se pudo crear el usuario. Inténtalo de nuevo más tarde.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Cancelar y volver a la lista de usuarios
-  const handleCancel = () => {
-    router.push("/configurar/admin");
-  };
-
   // Si está cargando, mostramos un indicador
   if (loading) {
     return (
-      <div className="container mx-auto py-6">
+      <div className="max-w-5xl mx-auto py-6">
         <div className="text-center py-8">Cargando formulario...</div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex items-center mb-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleCancel}
-          className="mr-4"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Volver
-        </Button>
-        <h1 className="text-3xl font-bold">Crear Nuevo Usuario</h1>
+    <div className="max-w-5xl mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Nuevo Usuario Administrativo</h1>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            asChild
+          >
+            <Link href="/configurar/admin">
+              <ArrowLeft className="h-4 w-4" />
+              Volver
+            </Link>
+          </Button>
+        </div>
       </div>
 
-      <Card className="max-w-2xl mx-auto">
+      <Card>
         <CardHeader>
-          <CardTitle>Nuevo Usuario Administrativo</CardTitle>
+          <CardTitle>Crear Nuevo Administrador</CardTitle>
           <CardDescription>
             Introduce los datos para crear un nuevo usuario con acceso al panel de administración.
           </CardDescription>
@@ -325,17 +327,19 @@ export default function NuevoUsuarioPage() {
             <Button 
               type="button" 
               variant="outline" 
-              onClick={handleCancel}
+              onClick={() => router.push("/configurar/admin")}
               disabled={isSubmitting}
+              className="flex items-center gap-2"
             >
-              <X className="w-4 h-4 mr-2" />
+              <X className="w-4 h-4" />
               Cancelar
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting}
+              className="flex items-center gap-2"
             >
-              <Save className="w-4 h-4 mr-2" />
+              <Save className="w-4 h-4" />
               {isSubmitting ? "Guardando..." : "Guardar usuario"}
             </Button>
           </CardFooter>

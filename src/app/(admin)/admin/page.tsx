@@ -2,12 +2,31 @@
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BarChart3, LineChart, PieChart, ShoppingCart, Users } from "lucide-react"
+import { BarChart3, LineChart, PieChart, ShoppingCart, Users, ArrowLeft } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function DashboardPage() {
   return (
-    <div className="max-w-5xl mx-auto ">
-      <h1 className="text-3xl font-bold tracking-tight mb-6">Dashboard</h1>
+    <div className="max-w-5xl mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center">
+          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2"
+            asChild
+          >
+            <Link href="/configurar/admin">
+              <ArrowLeft className="h-4 w-4" />
+              Administración
+            </Link>
+          </Button>
+        </div>
+      </div>
       
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
         <Card>
@@ -71,61 +90,41 @@ export default function DashboardPage() {
         </Card>
       </div>
       
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList>
-          <TabsTrigger value="overview">Vista General</TabsTrigger>
-          <TabsTrigger value="analytics">Análisis</TabsTrigger>
-          <TabsTrigger value="reports">Informes</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Actividad Reciente</CardTitle>
-              <CardDescription>
-                Resumen de la actividad de la plataforma en los últimos 30 días.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>Actividad del Sistema</CardTitle>
+          <CardDescription>
+            Visualización de estadísticas y actividad de la plataforma
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList>
+              <TabsTrigger value="overview">Vista General</TabsTrigger>
+              <TabsTrigger value="analytics">Análisis</TabsTrigger>
+              <TabsTrigger value="reports">Informes</TabsTrigger>
+            </TabsList>
+            <TabsContent value="overview" className="mt-4">
               <div className="h-[300px] flex items-center justify-center border rounded-md bg-muted/10">
                 <PieChart className="h-10 w-10 text-muted-foreground" />
                 <span className="ml-2 text-muted-foreground">Gráfico de actividad reciente</span>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="analytics" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Estadísticas de uso</CardTitle>
-              <CardDescription>
-                Análisis detallado del uso de la plataforma.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            </TabsContent>
+            <TabsContent value="analytics" className="mt-4">
               <div className="h-[300px] flex items-center justify-center border rounded-md bg-muted/10">
                 <BarChart3 className="h-10 w-10 text-muted-foreground" />
                 <span className="ml-2 text-muted-foreground">Gráfico de análisis</span>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="reports" className="mt-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Informes Mensuales</CardTitle>
-              <CardDescription>
-                Informes detallados sobre el rendimiento de la plataforma.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+            </TabsContent>
+            <TabsContent value="reports" className="mt-4">
               <div className="h-[300px] flex items-center justify-center border rounded-md bg-muted/10">
                 <LineChart className="h-10 w-10 text-muted-foreground" />
                 <span className="ml-2 text-muted-foreground">Gráfico de informes</span>
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   )
 } 

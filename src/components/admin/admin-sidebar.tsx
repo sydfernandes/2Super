@@ -216,87 +216,74 @@ export function NavMain({ navMain }: NavMainProps) {
   // Hardcoded data
   const staticNavMain = [
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
+      title: "Panel Admin",
+      url: "/admin",
+      icon: PieChart,
       isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
-      items: [
-        {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Settings",
+      title: "Gestionar",
       url: "#",
       icon: Settings2,
       items: [
         {
-          title: "General",
-          url: "#",
+          title: "Conexión API",
+          url: "/gestionar/conexion-api",
         },
         {
-          title: "Team",
-          url: "#",
+          title: "Productos",
+          url: "/gestionar/productos",
         },
         {
-          title: "Billing",
-          url: "#",
+          title: "Precios",
+          url: "/gestionar/precios",
         },
         {
-          title: "Limits",
-          url: "#",
+          title: "Marcas",
+          url: "/gestionar/marcas",
+        },
+        {
+          title: "Supermercados",
+          url: "/gestionar/supermercados",
+        },
+        {
+          title: "Categorías",
+          url: "/gestionar/categorias",
+        },
+        {
+          title: "Tipos de Producto",
+          url: "/gestionar/tipodeproducto",
+        },
+        {
+          title: "Usuarios",
+          url: "/gestionar/usuarios",
+        },
+      ],
+    },
+    {
+      title: "Configurar",
+      url: "#",
+      icon: Settings2,
+      items: [
+        {
+          title: "Etiquetas",
+          url: "/configurar/etiquetas",
+        },
+        {
+          title: "Géneros",
+          url: "/configurar/generos",
+        },
+        {
+          title: "Modos de Lista",
+          url: "/configurar/modosdelista",
+        },
+        {
+          title: "Modos de Obtención",
+          url: "/configurar/modosdeobtencion",
+        },
+        {
+          title: "Unidades de Medida",
+          url: "/configurar/unidadesdemedida",
         },
       ],
     },
@@ -306,7 +293,7 @@ export function NavMain({ navMain }: NavMainProps) {
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
+      <SidebarGroupLabel>Administración</SidebarGroupLabel>
       <SidebarMenu>
         {navData.map((item) => (
           <Collapsible
@@ -316,26 +303,37 @@ export function NavMain({ navMain }: NavMainProps) {
             className="group/collapsible"
           >
             <SidebarMenuItem>
-              <CollapsibleTrigger asChild>
-                <SidebarMenuButton tooltip={item.title}>
-                  {item.icon && <item.icon />}
-                  <span>{item.title}</span>
-                  <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+              {item.items ? (
+                <>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton tooltip={item.title}>
+                      {item.icon && <item.icon />}
+                      <span>{item.title}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      {item.items?.map((subItem) => (
+                        <SidebarMenuSubItem key={subItem.title}>
+                          <SidebarMenuSubButton asChild>
+                            <Link href={subItem.url}>
+                              <span>{subItem.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </>
+              ) : (
+                <SidebarMenuButton asChild>
+                  <Link href={item.url}>
+                    {item.icon && <item.icon />}
+                    <span>{item.title}</span>
+                  </Link>
                 </SidebarMenuButton>
-              </CollapsibleTrigger>
-              <CollapsibleContent>
-                <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton asChild>
-                        <a href={subItem.url}>
-                          <span>{subItem.title}</span>
-                        </a>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
-              </CollapsibleContent>
+              )}
             </SidebarMenuItem>
           </Collapsible>
         ))}

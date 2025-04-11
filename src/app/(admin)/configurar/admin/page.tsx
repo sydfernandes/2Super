@@ -13,7 +13,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { PlusCircle, Search, UserCog, X, MoreVertical, Ban, CheckCircle, AlertCircle, Edit, Trash2 } from "lucide-react"
+import { PlusCircle, Search, UserCog, X, MoreVertical, Ban, CheckCircle, AlertCircle, Edit, Trash2, Shield } from "lucide-react"
 import { prisma } from "@/lib/db"
 
 import { Button } from "@/components/ui/button"
@@ -233,11 +233,22 @@ function AdminUserForm({
       )}
       
       <DialogFooter>
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" onClick={onCancel} className="flex items-center gap-2">
+          <X className="h-4 w-4" />
           Cancelar
         </Button>
-        <Button type="submit">
-          {user ? "Guardar cambios" : "Crear administrador"}
+        <Button type="submit" className="flex items-center gap-2">
+          {user ? (
+            <>
+              <Edit className="h-4 w-4" />
+              Guardar cambios
+            </>
+          ) : (
+            <>
+              <PlusCircle className="h-4 w-4" />
+              Crear administrador
+            </>
+          )}
         </Button>
       </DialogFooter>
     </form>
@@ -433,13 +444,21 @@ export default function AdminUsersPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <div>
-            <CardTitle>Gestión de Administradores</CardTitle>
-            <CardDescription>Gestionar usuarios administrativos del sistema</CardDescription>
-          </div>
+    <div className="max-w-5xl mx-auto py-6">
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Gestión de Administradores</h1>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline"
+            className="flex items-center gap-2"
+            onClick={() => router.push('/configurar/admin/tipos-usuario')}
+          >
+            <Shield className="h-4 w-4" />
+            Gestionar Roles
+          </Button>
           <Button 
             className="flex items-center gap-2"
             onClick={() => router.push('/configurar/admin/nuevo')}
@@ -447,6 +466,13 @@ export default function AdminUsersPage() {
             <PlusCircle className="h-4 w-4" />
             Nuevo Administrador
           </Button>
+        </div>
+      </div>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Administradores del Sistema</CardTitle>
+          <CardDescription>Gestionar usuarios administrativos con acceso al panel de administración</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center mb-4">
@@ -518,25 +544,28 @@ export default function AdminUsersPage() {
                               onClick={() => {
                                 router.push(`/configurar/admin/editar/${user.id}`);
                               }}
+                              className="flex items-center"
                             >
                               <Edit className="mr-2 h-4 w-4" />
                               Editar
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleToggleStatus(user)}
+                              className="flex items-center"
                             >
                               <CheckCircle className="mr-2 h-4 w-4" />
                               {user.activo ? "Desactivar" : "Activar"}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleToggleBlock(user)}
+                              className="flex items-center"
                             >
                               <Ban className="mr-2 h-4 w-4" />
                               {user.bloqueado ? "Desbloquear" : "Bloquear"}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem 
-                              className="text-destructive focus:text-destructive"
+                              className="text-destructive focus:text-destructive flex items-center"
                               onClick={() => {
                                 setSelectedUser(user);
                                 setIsDeleteDialogOpen(true);
@@ -567,10 +596,12 @@ export default function AdminUsersPage() {
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)} className="flex items-center gap-2">
+              <X className="h-4 w-4" />
               Cancelar
             </Button>
-            <Button variant="destructive" onClick={handleDeleteUser}>
+            <Button variant="destructive" onClick={handleDeleteUser} className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
               Eliminar
             </Button>
           </DialogFooter>

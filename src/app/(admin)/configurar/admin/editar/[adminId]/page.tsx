@@ -62,8 +62,9 @@ type Usuario = {
   };
 }
 
-export default function EditarAdminPage({ params }: { params: { adminId: string } }) {
-  const adminId = params.adminId;
+export default function EditarAdminPage({ params }: { params: Promise<{ adminId: string }> }) {
+  // Usando React.use() para desenvolver params según las recomendaciones de Next.js 15.3.0
+  const { adminId } = React.use(params);
   const router = useRouter();
   const [user, setUser] = useState<Usuario | null>(null);
   const [loading, setLoading] = useState(true);

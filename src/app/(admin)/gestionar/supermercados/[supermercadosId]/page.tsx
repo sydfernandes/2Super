@@ -1,1 +1,0 @@
-//pagina de gestion de un supermercado especifico

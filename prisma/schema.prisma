@@ -139,6 +139,7 @@ model Marca {
   productos         Producto[]
   usuariosPreferidos Usuario[]       @relation("UsuarioMarcasPreferidas")
   usuariosEvitados  Usuario[]        @relation("UsuarioMarcasEvitadas")
+  supermercados     SupermercadoMarca[]
 
   @@map("marcas")
 }
@@ -148,7 +149,7 @@ model Producto {
   nombre            String           @db.VarChar(200)
   marcaId           Int              @map("marca_id")
   tipoProductoId    Int              @map("tipo_producto_id")
-  tamanoCantidad    Decimal          @map("tamano_cantidad")
+  tamanoCantidad    Decimal          @db.Decimal(65, 30) @map("tamano_cantidad")
   unidadMedidaId    Int              @map("unidad_medida_id")
   fotoUrl           String?          @db.VarChar(500) @map("foto_url")
   fechaCreacion     DateTime         @default(now()) @map("fecha_creacion")
@@ -188,6 +189,7 @@ model Supermercado {
   precios           Precio[]
   historialPrecios  HistorialPrecio[]
   usuariosFavoritos Usuario[]        @relation("UsuarioSupermercadosFavoritos")
+  marcas            SupermercadoMarca[]
 
   @@map("supermercados")
 }
@@ -196,9 +198,9 @@ model Precio {
   id                Int              @id @default(autoincrement())
   productoId        Int              @map("producto_id")
   supermercadoId    Int              @map("supermercado_id")
-  precioActual      Int              @map("precio_actual")
+  precioActual      Decimal          @db.Decimal(65, 30) @map("precio_actual")
   esOferta          Boolean          @default(false) @map("es_oferta")
-  precioPromocional Int?             @map("precio_promocional")
+  precioPromocional Decimal?         @db.Decimal(65, 30) @map("precio_promocional")
   fechaInicioPromocion DateTime?     @map("fecha_inicio_promocion")
   fechaFinPromocion DateTime?        @map("fecha_fin_promocion")
   fechaActualizacion DateTime        @default(now()) @map("fecha_actualizacion")
@@ -216,9 +218,9 @@ model HistorialPrecio {
   id                Int              @id @default(autoincrement())
   productoId        Int              @map("producto_id")
   supermercadoId    Int              @map("supermercado_id")
-  precio            Int
+  precio            Decimal          @db.Decimal(65, 30)
   esOferta          Boolean          @map("es_oferta")
-  precioPromocional Int?             @map("precio_promocional")
+  precioPromocional Decimal?         @db.Decimal(65, 30) @map("precio_promocional")
   fechaRegistro     DateTime         @default(now()) @map("fecha_registro")
   metodoObtencionId Int              @map("metodo_obtencion_id")
   
@@ -374,7 +376,7 @@ model ElementoLista {
   id                Int              @id @default(autoincrement())
   listaId           Int              @map("lista_id")
   productoId        Int              @map("producto_id")
-  cantidad          Decimal          @default(1)
+  cantidad          Decimal          @db.Decimal(65, 30) @default(1)
   comprado          Boolean          @default(false)
   fechaAdicion      DateTime         @default(now()) @map("fecha_adicion")
   fechaCompra       DateTime?        @map("fecha_compra")
@@ -410,7 +412,7 @@ model Ingrediente {
   id                Int              @id @default(autoincrement())
   recetaId          Int              @map("receta_id")
   tipoProductoId    Int              @map("tipo_producto_id")
-  cantidad          Decimal
+  cantidad          Decimal          @db.Decimal(65, 30)
   unidadMedidaId    Int              @map("unidad_medida_id")
   
   // Relations
@@ -454,4 +456,17 @@ model ValidacionProducto {
   admin             Usuario?         @relation("AdminValidaciones", fields: [adminId], references: [id])
 
   @@map("validaciones_productos")
+}
+
+model SupermercadoMarca {
+  supermercadoId    Int              @map("supermercado_id")
+  marcaId           Int              @map("marca_id")
+  createdAt         DateTime         @default(now()) @map("created_at")
+  
+  // Relations
+  supermercado      Supermercado     @relation(fields: [supermercadoId], references: [id], onDelete: Cascade)
+  marca             Marca            @relation(fields: [marcaId], references: [id], onDelete: Cascade)
+
+  @@id([supermercadoId, marcaId])
+  @@map("supermercados_marcas")
 } 
